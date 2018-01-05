@@ -1,0 +1,171 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>byoct-processor</artifactId>
+    <packaging>bundle</packaging>
+
+    <parent>
+        <groupId>io.toolisticon.byoct</groupId>
+        <artifactId>byoct-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <name>byoct-processor</name>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>io.toolisticon.byoct</groupId>
+            <artifactId>byoct-api</artifactId>
+        </dependency>
+
+
+        <dependency>
+            <groupId>de.holisticon.annotationprocessortoolkit</groupId>
+            <artifactId>annotationprocessor</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.toolisticon.spiap</groupId>
+            <artifactId>spiap-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.toolisticon.spiap</groupId>
+            <artifactId>spiap-processor</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.testing.compile</groupId>
+            <artifactId>compile-testing</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>de.holisticon.annotationprocessortoolkit</groupId>
+            <artifactId>testhelper</artifactId>
+        </dependency>
+
+
+    </dependencies>
+
+
+    <build>
+
+        <plugins>
+
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+
+
+                        <configuration>
+
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>io.toolisticon.spiap:*</exclude>
+                                </excludes>
+                                <includes>
+                                    <include>de.holisticon.annotationprocessortoolkit:*</include>
+                                </includes>
+                            </artifactSet>
+
+                            <!--
+                                usually you should repackage all referenced 3RD party libraries into your annotation processor jar.
+                                    - because the annotation processor should always be linked as provided dependency when it is used.
+                                    - to prevent a version conflict of your annotation processors dependencies and the applications dependencies.
+                            -->
+
+                            <relocations>
+                                <relocation>
+                                    <pattern>de.holisticon.annotationprocessortoolkit</pattern>
+                                    <shadedPattern>
+                                        io.toolisticon.byoct.processor._3rdparty.de.holisticon.annotationprocessortoolkit
+                                    </shadedPattern>
+                                </relocation>
+
+                            </relocations>
+
+                        </configuration>
+
+                    </execution>
+                </executions>
+
+
+            </plugin>
+
+
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <verbose>true</verbose>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+
+
+            <!--
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-annotations</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>target/generated-sources/annotations</directory>
+                                </resource>
+                            </resources>
+                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            -->
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.9.1</version>
+                <executions>
+                    <execution>
+                        <id>add-resource</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>add-resource</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>target/generated-sources/annotations</directory>
+                                    <targetPath/>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+        </plugins>
+
+    </build>
+
+
+</project>

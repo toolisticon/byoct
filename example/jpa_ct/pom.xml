@@ -1,0 +1,98 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>byoct-example-jpa</artifactId>
+    <packaging>bundle</packaging>
+
+    <parent>
+        <groupId>io.toolisticon.byoct</groupId>
+        <artifactId>byoct-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <name>byoct-example-jpa</name>
+
+
+    <dependencies>
+
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>javax.persistence-api</artifactId>
+            <version>2.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.toolisticon.byoct</groupId>
+            <artifactId>byoct-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.toolisticon.byoct</groupId>
+            <artifactId>byoct-processor</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
+
+
+    <build>
+
+        <plugins>
+
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <verbose>true</verbose>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+
+            <!-- suppress deployment of example -->
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.0.4,)</version>
+                                </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>1.6</version>
+                                </requireJavaVersion>
+                                <bannedDependencies>
+                                    <searchTransitive>false</searchTransitive>
+                                    <excludes>
+                                        <exclude>*</exclude>
+                                    </excludes>
+                                    <includes>
+                                        <include>*:*:*:*:*:*</include>
+                                    </includes>
+                                </bannedDependencies>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+
+    </build>
+
+
+</project>

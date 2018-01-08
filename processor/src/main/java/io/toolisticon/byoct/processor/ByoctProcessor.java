@@ -1,8 +1,6 @@
 package io.toolisticon.byoct.processor;
 
-import com.sun.tools.javac.code.TargetType;
 import de.holisticon.annotationprocessortoolkit.AbstractAnnotationProcessor;
-import de.holisticon.annotationprocessortoolkit.generators.SimpleJavaWriter;
 import de.holisticon.annotationprocessortoolkit.generators.SimpleResourceWriter;
 import de.holisticon.annotationprocessortoolkit.tools.ElementUtils;
 import io.toolisticon.byoct.api.GenerateProjectStructure;
@@ -17,9 +15,8 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +31,92 @@ import java.util.regex.Pattern;
 public class ByoctProcessor extends AbstractAnnotationProcessor {
 
     public static final Pattern PACKAGE_PATTERN = Pattern.compile("[a-z](?:[a-z0-9])*([.][a-z](?:[a-z0-9])*)*");
+
+    public enum JavaElementKind {
+        METHOD(ElementType.METHOD, "/testcases/methodTestcaseTemplate.java.tpl"),
+        CONSTRUCTOR(ElementType.CONSTRUCTOR, "/testcases/methodTestcaseTemplate.java.tpl"),
+        PARAMETER(ElementType.PARAMETER, "/testcases/parameterTestcaseTemplate.java.tpl"),
+        FIELD(ElementType.FIELD, "/testcases/fieldTestcaseTemplate.java.tpl"),
+        INTERFACE(ElementType.TYPE, "/testcases/interfaceTestcaseTemplate.java.tpl"),
+        ENUM(ElementType.TYPE, "/testcases/enumTestcaseTemplate.java.tpl"),
+        CLASS(ElementType.TYPE, "/testcases/classTestcaseTemplate.java.tpl"),
+        ANNOTATION(ElementType.ANNOTATION_TYPE, "/testcases/annotationTestcaseTemplate.java.tpl"),
+        PACKAGE(ElementType.PACKAGE, "/testcases/packageTestcaseTemplate.java.tpl");
+
+        private final ElementType elementType;
+        private final String templateName;
+
+        JavaElementKind(ElementType elementType, String templateName) {
+            this.elementType = elementType;
+            this.templateName = templateName;
+        }
+
+        public static JavaElementKind[] getJavaElementKindForElementType(ElementType searchElementType) {
+
+            List<JavaElementKind> result = new ArrayList<JavaElementKind>();
+
+            for (JavaElementKind element : JavaElementKind.values()) {
+                if (element.elementType.equals(searchElementType)) {
+                    result.add(element);
+                }
+            }
+
+            return result.toArray(new JavaElementKind[result.size()]);
+        }
+
+    }
+
+    public static class Testcase {
+
+        private final String processorName;
+        private final String elementTypeName;
+        private final String javaElementKindName;
+        private final String filename;
+        private final String packageName;
+        private final String templateName;
+
+
+        public Testcase(String processedAnnotationName, ElementType elementType, JavaElementKind javaElementKind, String filename, String packageName) {
+            this.processorName = processedAnnotationName != null ? processedAnnotationName.toLowerCase() + "processor" : null;
+            elementTypeName = elementType != null ? elementType.name().toLowerCase() : null;
+            javaElementKindName = javaElementKind != null ? "test" + javaElementKind.name().toLowerCase() : null;
+            this.filename = filename;
+            this.packageName = packageName + "." + javaElementKindName;
+            this.templateName = javaElementKind.templateName;
+        }
+
+        public String getProcessorName() {
+            return processorName;
+        }
+
+        public String getPackageName() {
+            return packageName;
+        }
+
+        public String getTemplateName() {
+            return templateName;
+        }
+
+        public String getElementTypeName() {
+            return elementTypeName;
+        }
+
+        public String getJavaElementKindName() {
+            return javaElementKindName;
+        }
+
+        public String getFilename() {
+            return filename;
+        }
+
+        public String getFilePath() {
+            return "testcases/" + this.processorName + "/" + elementTypeName + "/" + javaElementKindName + "/" + filename + ".java";
+        }
+
+        public String getTestcasePackage() {
+            return "testcases." + this.processorName + "." + elementTypeName + "." + javaElementKindName;
+        }
+    }
 
 
     @Override
@@ -93,11 +176,13 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
                 String targetPackage = getTargetPackage((TypeElement) annotationElement, targetPackageName, relocationBasePackage);
                 String annotationProcessorClassName = annotationElement.getSimpleName().toString() + "Processor";
 
-                Target targetAnnotation = annotationElement.getAnnotation(Target.class);
-                ElementType[] elementKinds = targetAnnotation != null ? targetAnnotation.value() : new ElementType[0];
+                Testcase[] testcases = getTestcases((TypeElement) annotationElement, targetPackage);
 
                 createAnnotationProcessor((TypeElement) annotationElement, targetPackage, annotationProcessorClassName);
-                createAnnotationProcessorTestcase((TypeElement) annotationElement, targetPackage, annotationProcessorClassName);
+                createAnnotationProcessorMessages((TypeElement) annotationElement, targetPackage, annotationProcessorClassName);
+
+                createAnnotationProcessorTestcases((TypeElement) annotationElement, testcases);
+                createAnnotationProcessorTestcase((TypeElement) annotationElement, targetPackage, annotationProcessorClassName, testcases);
 
             }
 
@@ -110,8 +195,25 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
     private String getTargetPackage(TypeElement annotationType, String targetPackageName, String relocationPackageName) {
 
         PackageElement annotationsPackageElement = (PackageElement) ElementUtils.AccessEnclosingElements.getFirstEnclosingElementOfKind(annotationType, ElementKind.PACKAGE);
-        return targetPackageName + annotationsPackageElement.getQualifiedName().toString().substring(relocationPackageName.length());
+        return targetPackageName + annotationsPackageElement.getQualifiedName().toString().substring(relocationPackageName.length()) + "." + annotationType.getSimpleName().toString().toLowerCase() + "processor";
 
+    }
+
+    private Testcase[] getTestcases(TypeElement annotationType, String targetPackage) {
+        Target targetAnnotation = annotationType.getAnnotation(Target.class);
+        ElementType[] elementTypes = targetAnnotation != null ? targetAnnotation.value() : new ElementType[0];
+
+        List<Testcase> testcases = new ArrayList<Testcase>();
+        for (ElementType elementType : elementTypes) {
+
+            for (JavaElementKind javaElementKind : JavaElementKind.getJavaElementKindForElementType(elementType)) {
+
+                testcases.add(new Testcase(annotationType.getSimpleName().toString(),elementType, javaElementKind, "TestcaseValidUsage", targetPackage));
+
+            }
+
+        }
+        return testcases.toArray(new Testcase[testcases.size()]);
     }
 
     private void createAnnotationProcessor(TypeElement annotationType, String targetPkg, String annotationProcessorClassName) {
@@ -138,14 +240,70 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
     }
 
-    private void createAnnotationProcessorTestcase(TypeElement annotationType, String targetPackage, String annotationProcessorClassName) {
+    private void createAnnotationProcessorMessages(TypeElement annotationType, String targetPackage, String annotationProcessorClassName) {
+
+
+        // create Model
+        Map<String, Object> model = new HashMap<String, Object>();
+        model.put("targetPackage", targetPackage);
+        model.put("processorClassName", annotationProcessorClassName);
+
+
+        String filePath = "src.main.java." + targetPackage;
+        String fileName = annotationProcessorClassName + "Messages.java";
+
+
+        try {
+            SimpleResourceWriter resourceWriter = getFileObjectUtils().createResource(fileName, filePath, StandardLocation.CLASS_OUTPUT);
+            resourceWriter.writeTemplate("/AnnotationProcessorMessageTemplate.java.tpl", model);
+            resourceWriter.close();
+        } catch (IOException e) {
+            getMessager().error(null, ByoctProcessorMessages.ERROR_COULD_NOT_GENERATE_ANNOTATION_PROCESSOR_MESSAGES.getMessage(), filePath);
+        }
+
+    }
+
+    private void createAnnotationProcessorTestcases(TypeElement annotationType, Testcase[] testcases) {
+
+        if (testcases == null) {
+            return;
+        }
+
+        for (Testcase testcase : testcases) {
+
+            // create Model
+            Map<String, Object> model = new HashMap<String, Object>();
+            model.put("targetPackage", testcase.packageName);
+            model.put("fullyQualifiedAnnotationName", annotationType.getQualifiedName().toString());
+            model.put("annotationName", annotationType.getSimpleName());
+            model.put("className", testcase.getFilename());
+
+
+            String filePath = "src.test.resources." + testcase.getTestcasePackage();
+            String fileName = testcase.getFilename() + ".java" ;
+
+
+            try {
+                SimpleResourceWriter resourceWriter = getFileObjectUtils().createResource(fileName, filePath, StandardLocation.CLASS_OUTPUT);
+                resourceWriter.writeTemplate(testcase.templateName, model);
+                resourceWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                getMessager().error(null, ByoctProcessorMessages.ERROR_COULD_NOT_GENERATE_UNIT_TEST.getMessage(), filePath);
+            }
+
+        }
+    }
+
+    private void createAnnotationProcessorTestcase(TypeElement annotationType, String targetPackage, String annotationProcessorClassName, Testcase[] testcases) {
 
 
         // create Model
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("testcasePackage", targetPackage);
         model.put("processorClassName", annotationProcessorClassName);
-        model.put("testcaseFile", "");
+        model.put("testcases", testcases);
+        //  model.put("elementTypes", )
 
 
         String filePath = "src.test.java." + targetPackage;

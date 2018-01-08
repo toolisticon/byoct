@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.junit.Ignored;
+import org.junit.Ignore;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,13 +19,13 @@ import java.util.List;
 public class ${processorClassName}Test extends AbstractAnnotationProcessorIntegrationTest<${processorClassName}> {
 
 
-    public ServiceProcessorTest(String description, AnnotationProcessorIntegrationTestConfiguration configuration) {
+    public ${processorClassName}Test(String description, AnnotationProcessorIntegrationTestConfiguration configuration) {
         super(configuration);
     }
 
     @Before
     public void init() {
-        ServiceProcessorMessages.setPrintMessageCodes(true);
+        ${processorClassName}Messages.setPrintMessageCodes(true);
     }
 
     @Override
@@ -37,14 +37,22 @@ public class ${processorClassName}Test extends AbstractAnnotationProcessorIntegr
     public static List<Object[]> data() {
 
         return Arrays.asList(new Object[][]{
+
+                !{for testcase : testcases}
+                // --------------------------------------------------------------
+                // -- ${testcase.elementTypeName} : ${testcase.javaElementKindName}
+                // --------------------------------------------------------------
+
                 {
                         "Test valid usage",
                         AnnotationProcessorIntegrationTestConfigurationBuilder
                                 .createTestConfig()
-                                .setSourceFileToCompile("${testcaseFile}")
+                                .setSourceFileToCompile("${testcase.filePath}")
                                 .compilationShouldSucceed()
                                 .build()
                 },
+
+                !{/for}
 
         });
 
@@ -52,7 +60,7 @@ public class ${processorClassName}Test extends AbstractAnnotationProcessorIntegr
 
 
     @Test
-    @Ignored
+    @Ignore
     public void testCorrectnessOfAdviceArgumentAnnotation() {
         super.test();
     }

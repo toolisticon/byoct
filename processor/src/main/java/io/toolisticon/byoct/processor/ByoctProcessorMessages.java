@@ -6,6 +6,7 @@ package io.toolisticon.byoct.processor;
 public enum ByoctProcessorMessages {
 
     ERROR_COULD_NOT_GENERATE_ANNOTATION_PROCESSOR("ERROR_001", "Could not create annotation processor: ${0}"),
+    ERROR_COULD_NOT_GENERATE_ANNOTATION_PROCESSOR_MESSAGES("ERROR_004", "Could not create annotation processor messages class: ${0}"),
     ERROR_COULD_NOT_GENERATE_POM_XML("ERROR_002", "Could not create pom.xml"),
     ERROR_COULD_NOT_GENERATE_UNIT_TEST("ERROR_003", "Could not create unit test for annotation processor: ${0}"),
     ;

@@ -76,9 +76,9 @@
         <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
         <encoding>UTF-8</encoding>
 
-        <annotationProcessorToolkit.version>0.6.2-SNAPSHOT</annotationProcessorToolkit.version>
+        <annotationProcessorToolkit.version>0.6.3</annotationProcessorToolkit.version>
 
-        <spiap.version>0.2.1-SNAPSHOT</spiap.version>
+        <spiap.version>0.4.0</spiap.version>
 
         <!-- versions of test dependencies -->
         <junit.version>4.12</junit.version>

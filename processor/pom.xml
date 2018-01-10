@@ -22,7 +22,7 @@
 
 
         <dependency>
-            <groupId>de.holisticon.annotationprocessortoolkit</groupId>
+            <groupId>io.toolisticon.annotationprocessortoolkit</groupId>
             <artifactId>annotationprocessor</artifactId>
         </dependency>
 
@@ -43,7 +43,7 @@
         </dependency>
 
         <dependency>
-            <groupId>de.holisticon.annotationprocessortoolkit</groupId>
+            <groupId>io.toolisticon.annotationprocessortoolkit</groupId>
             <artifactId>testhelper</artifactId>
         </dependency>
 
@@ -75,7 +75,7 @@
                                     <exclude>io.toolisticon.spiap:*</exclude>
                                 </excludes>
                                 <includes>
-                                    <include>de.holisticon.annotationprocessortoolkit:*</include>
+                                    <include>io.toolisticon.annotationprocessortoolkit:*</include>
                                 </includes>
                             </artifactSet>
 
@@ -87,9 +87,9 @@
 
                             <relocations>
                                 <relocation>
-                                    <pattern>de.holisticon.annotationprocessortoolkit</pattern>
+                                    <pattern>io.toolisticon.annotationprocessortoolkit</pattern>
                                     <shadedPattern>
-                                        io.toolisticon.byoct.processor._3rdparty.de.holisticon.annotationprocessortoolkit
+                                        io.toolisticon.byoct.processor._3rdparty.io.toolisticon.annotationprocessortoolkit
                                     </shadedPattern>
                                 </relocation>
 

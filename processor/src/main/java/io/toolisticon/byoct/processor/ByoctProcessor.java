@@ -1,8 +1,8 @@
 package io.toolisticon.byoct.processor;
 
-import de.holisticon.annotationprocessortoolkit.AbstractAnnotationProcessor;
-import de.holisticon.annotationprocessortoolkit.generators.SimpleResourceWriter;
-import de.holisticon.annotationprocessortoolkit.tools.ElementUtils;
+import io.toolisticon.annotationprocessortoolkit.AbstractAnnotationProcessor;
+import io.toolisticon.annotationprocessortoolkit.generators.SimpleResourceWriter;
+import io.toolisticon.annotationprocessortoolkit.tools.ElementUtils;
 import io.toolisticon.byoct.api.GenerateProjectStructure;
 import io.toolisticon.spiap.api.Service;
 

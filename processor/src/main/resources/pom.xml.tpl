@@ -83,9 +83,9 @@
         <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
         <encoding>UTF-8</encoding>
 
-        <annotationProcessorToolkit.version>0.6.1</annotationProcessorToolkit.version>
+        <annotationProcessorToolkit.version>0.7.0</annotationProcessorToolkit.version>
 
-        <spiap.version>0.3.0</spiap.version>
+        <spiap.version>0.5.0</spiap.version>
 
         <!-- versions of test dependencies -->
         <junit.version>4.12</junit.version>
@@ -248,7 +248,7 @@
                                     <includes>
                                         <include>io.toolisticon.byoct:*</include>
                                         <include>io.toolisticon.spiap:*</include>
-                                        <include>de.holisticon.annotationprocessortoolkit:*</include>
+                                        <include>io.toolisticon.annotationprocessortoolkit:*</include>
                                         <include>*:*:*:*:test:*</include>
                                         <include>*:*:*:*:provided:*</include>
                                     </includes>
@@ -330,7 +330,7 @@
                                     <exclude>io.toolisticon.spiap:*</exclude>
                                 </excludes>
                                 <includes>
-                                    <include>de.holisticon.annotationprocessortoolkit:*</include>
+                                    <include>io.toolisticon.annotationprocessortoolkit:*</include>
                                 </includes>
                             </artifactSet>
 
@@ -342,9 +342,9 @@
 
                             <relocations>
                                 <relocation>
-                                    <pattern>de.holisticon.annotationprocessortoolkit</pattern>
+                                    <pattern>io.toolisticon.annotationprocessortoolkit</pattern>
                                     <shadedPattern>
-                                        io.toolisticon.byoct.processor._3rdparty.de.holisticon.annotationprocessortoolkit
+                                        io.toolisticon.byoct.processor._3rdparty.io.toolisticon.annotationprocessortoolkit
                                     </shadedPattern>
                                 </relocation>
 
@@ -473,7 +473,7 @@
 
             <!-- annotation processot toolkit dependencies-->
             <dependency>
-                <groupId>de.holisticon.annotationprocessortoolkit</groupId>
+                <groupId>io.toolisticon.annotationprocessortoolkit</groupId>
                 <artifactId>annotationprocessor</artifactId>
                 <version>${annotationProcessorToolkit.version}</version>
             </dependency>
@@ -503,7 +503,7 @@
             </dependency>
 
             <dependency>
-                <groupId>de.holisticon.annotationprocessortoolkit</groupId>
+                <groupId>io.toolisticon.annotationprocessortoolkit</groupId>
                 <artifactId>testhelper</artifactId>
                 <version>${annotationProcessorToolkit.version}</version>
                 <scope>test</scope>
@@ -528,7 +528,7 @@
 
 
         <dependency>
-            <groupId>de.holisticon.annotationprocessortoolkit</groupId>
+            <groupId>io.toolisticon.annotationprocessortoolkit</groupId>
             <artifactId>annotationprocessor</artifactId>
         </dependency>
 
@@ -548,7 +548,7 @@
         </dependency>
 
         <dependency>
-            <groupId>de.holisticon.annotationprocessortoolkit</groupId>
+            <groupId>io.toolisticon.annotationprocessortoolkit</groupId>
             <artifactId>testhelper</artifactId>
         </dependency>
 

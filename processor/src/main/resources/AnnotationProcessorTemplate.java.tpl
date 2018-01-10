@@ -1,6 +1,6 @@
 package ${targetPackage};
 
-import de.holisticon.annotationprocessortoolkit.AbstractAnnotationProcessor;
+import io.toolisticon.annotationprocessortoolkit.AbstractAnnotationProcessor;
 import ${fqAnnotationName};
 import io.toolisticon.spiap.api.Service;
 import io.toolisticon.spiap.api.OutOfService;

@@ -4,7 +4,7 @@ import ${fullyQualifiedAnnotationName};
 
 public class ${className} {
 
-    @${annotationName}
+    @${annotationName}(${annotationAttributeValues})
     ${className}( String parameter) {
 
     }

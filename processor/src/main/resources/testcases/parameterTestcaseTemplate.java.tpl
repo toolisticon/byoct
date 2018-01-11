@@ -4,6 +4,6 @@ import ${fullyQualifiedAnnotationName};
 
 public class ${className} {
 
-    String method(@${annotationName} String parameter);
+    String method(@${annotationName}(${annotationAttributeValues}) String parameter);
 
 }

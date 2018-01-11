@@ -2,7 +2,7 @@ package ${targetPackage};
 
 import ${fullyQualifiedAnnotationName};
 
-@${annotationName}
+@${annotationName}(${annotationAttributeValues})
 public @interface ${className} {
 
 }

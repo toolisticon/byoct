@@ -1,8 +1,10 @@
 package io.toolisticon.byoct.processor;
 
 import io.toolisticon.annotationprocessortoolkit.AbstractAnnotationProcessor;
+import io.toolisticon.annotationprocessortoolkit.filter.FluentElementFilter;
 import io.toolisticon.annotationprocessortoolkit.generators.SimpleResourceWriter;
 import io.toolisticon.annotationprocessortoolkit.tools.ElementUtils;
+import io.toolisticon.annotationprocessortoolkit.tools.characteristicsfilter.Filters;
 import io.toolisticon.byoct.api.GenerateProjectStructure;
 import io.toolisticon.spiap.api.Service;
 
@@ -10,14 +12,20 @@ import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.StandardLocation;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -208,7 +216,7 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
             for (JavaElementKind javaElementKind : JavaElementKind.getJavaElementKindForElementType(elementType)) {
 
-                testcases.add(new Testcase(annotationType.getSimpleName().toString(),elementType, javaElementKind, "TestcaseValidUsage", targetPackage));
+                testcases.add(new Testcase(annotationType.getSimpleName().toString(), elementType, javaElementKind, "TestcaseValidUsage", targetPackage));
 
             }
 
@@ -276,11 +284,12 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
             model.put("targetPackage", testcase.packageName);
             model.put("fullyQualifiedAnnotationName", annotationType.getQualifiedName().toString());
             model.put("annotationName", annotationType.getSimpleName());
+            model.put("annotationAttributeValues", createMandatoryAnnotationAttributeString(annotationType));
             model.put("className", testcase.getFilename());
 
 
             String filePath = "src.test.resources." + testcase.getTestcasePackage();
-            String fileName = testcase.getFilename() + ".java" ;
+            String fileName = testcase.getFilename() + ".java";
 
 
             try {
@@ -294,6 +303,93 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
         }
     }
+
+    private String createMandatoryAnnotationAttributeString(TypeElement typeElement) {
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        List<ExecutableElement> executableElements = ElementUtils.CastElement.castElementList(FluentElementFilter.createFluentFilter(typeElement.getEnclosedElements()).applyFilter(Filters.getElementKindFilter()).filterByOneOf(ElementKind.METHOD).getResult(), ExecutableElement.class);
+
+        boolean first = true;
+        for (ExecutableElement executableElement : executableElements) {
+
+
+
+            if (executableElement.getDefaultValue() == null) {
+
+                if (first) {
+                    first = false;
+                } else {
+                    stringBuilder.append(", ");
+                }
+
+                stringBuilder.append(executableElement.getSimpleName()).append("=");
+
+                TypeMirror typeMirror = executableElement.getReturnType();
+
+
+                boolean isArray = getTypeUtils().doCheckTypeKind().isArray(typeMirror);
+
+                if (isArray) {
+                    stringBuilder.append("{");
+                    typeMirror = getTypeUtils().doArrays().getArraysComponentType(typeMirror);
+                }
+
+                if (getTypeUtils().doCheckTypeKind().isOfTypeKind(typeMirror, TypeKind.BOOLEAN)) {
+                    stringBuilder.append(true);
+                } else if (getTypeUtils().doCheckTypeKind().isOfTypeKind(typeMirror, TypeKind.CHAR)) {
+                    stringBuilder.append("'X'");
+                } else if (getTypeUtils().doCheckTypeKind().isOfTypeKind(typeMirror, TypeKind.LONG)) {
+                    stringBuilder.append("5L");
+                } else if (getTypeUtils().doCheckTypeKind().isOfTypeKind(typeMirror, TypeKind.INT)) {
+                    stringBuilder.append("5");
+                } else if (getTypeUtils().doCheckTypeKind().isOfTypeKind(typeMirror, TypeKind.FLOAT)) {
+                    stringBuilder.append("5.0f");
+                } else if (getTypeUtils().doCheckTypeKind().isOfTypeKind(typeMirror, TypeKind.DOUBLE)) {
+                    stringBuilder.append("5.0");
+                } else if (getTypeUtils().doCheckTypeKind().isOfTypeKind(typeMirror, TypeKind.DECLARED)) {
+
+
+                    if (getTypeUtils().doTypeComparison().isAssignableTo(typeMirror, getTypeUtils().doTypeRetrieval().getTypeMirror(String.class))) {
+                        stringBuilder.append("\"STRING\"");
+                    } else if (getTypeUtils().doTypeComparison().isAssignableTo(typeMirror, getTypeUtils().doTypeRetrieval().getTypeMirror(Annotation.class))) {
+                        stringBuilder.append("@" + typeMirror.toString()).append("(" + createMandatoryAnnotationAttributeString(getTypeUtils().doTypeRetrieval().getTypeElement(typeMirror.toString())) + ")");
+                    } else if (getTypeUtils().doTypeComparison().isAssignableTo(typeMirror, getTypeUtils().doTypeRetrieval().getTypeMirror(Class.class))) {
+
+                        List<? extends TypeParameterElement> typeParameterElements = getTypeUtils().doTypeRetrieval().getTypeElement(typeMirror.toString()).getTypeParameters();
+                        if (typeParameterElements.size() == 0) {
+                            stringBuilder.append("String.class");
+                        } else {
+                            if(typeParameterElements.get(0).getBounds().size() == 0) {
+                                stringBuilder.append(typeParameterElements.get(0).getSimpleName()).append(".class");
+                            } else {
+                                stringBuilder.append(typeParameterElements.get(0).getBounds().get(0).toString()).append(".class");
+                            }
+                        }
+
+                    } else if (((TypeElement)getTypeUtils().getTypes().asElement(typeMirror)).getKind().equals(ElementKind.ENUM)) {
+
+
+                        String enumConstant = FluentElementFilter.createFluentFilter(getTypeUtils().doTypeRetrieval().getTypeElement(typeMirror.toString()).getEnclosedElements()).applyFilter(Filters.getElementKindFilter()).filterByOneOf(ElementKind.ENUM_CONSTANT).getResult().get(0).getSimpleName().toString();
+                        stringBuilder.append(typeMirror.toString()).append(".").append(enumConstant);
+
+                    }
+
+                }
+
+                if (isArray) {
+                    stringBuilder.append("}");
+                }
+
+            }
+        }
+
+
+        return stringBuilder.toString();
+
+
+    }
+
 
     private void createAnnotationProcessorTestcase(TypeElement annotationType, String targetPackage, String annotationProcessorClassName, Testcase[] testcases) {
 

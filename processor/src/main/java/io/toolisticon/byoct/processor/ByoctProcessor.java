@@ -25,7 +25,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -224,6 +223,13 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
         return testcases.toArray(new Testcase[testcases.size()]);
     }
 
+    /**
+     * Creates all annotation processors
+     *
+     * @param annotationType
+     * @param targetPkg
+     * @param annotationProcessorClassName
+     */
     private void createAnnotationProcessor(TypeElement annotationType, String targetPkg, String annotationProcessorClassName) {
 
 
@@ -248,6 +254,13 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
     }
 
+    /**
+     * Creates message enums for all processors.
+     *
+     * @param annotationType
+     * @param targetPackage
+     * @param annotationProcessorClassName
+     */
     private void createAnnotationProcessorMessages(TypeElement annotationType, String targetPackage, String annotationProcessorClassName) {
 
 
@@ -271,6 +284,12 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
     }
 
+    /**
+     * Creates the testcase files which are compiled during the unit tests.
+     *
+     * @param annotationType
+     * @param testcases
+     */
     private void createAnnotationProcessorTestcases(TypeElement annotationType, Testcase[] testcases) {
 
         if (testcases == null) {
@@ -304,6 +323,12 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
         }
     }
 
+    /**
+     * Determines all mandatory annotation attributes and creates a string that contains all mandatory attributes with values according to the attributes type.
+     *
+     * @param typeElement
+     * @return
+     */
     private String createMandatoryAnnotationAttributeString(TypeElement typeElement) {
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -312,7 +337,6 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
         boolean first = true;
         for (ExecutableElement executableElement : executableElements) {
-
 
 
             if (executableElement.getDefaultValue() == null) {
@@ -360,14 +384,14 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
                         if (typeParameterElements.size() == 0) {
                             stringBuilder.append("String.class");
                         } else {
-                            if(typeParameterElements.get(0).getBounds().size() == 0) {
+                            if (typeParameterElements.get(0).getBounds().size() == 0) {
                                 stringBuilder.append(typeParameterElements.get(0).getSimpleName()).append(".class");
                             } else {
                                 stringBuilder.append(typeParameterElements.get(0).getBounds().get(0).toString()).append(".class");
                             }
                         }
 
-                    } else if (((TypeElement)getTypeUtils().getTypes().asElement(typeMirror)).getKind().equals(ElementKind.ENUM)) {
+                    } else if (((TypeElement) getTypeUtils().getTypes().asElement(typeMirror)).getKind().equals(ElementKind.ENUM)) {
 
 
                         String enumConstant = FluentElementFilter.createFluentFilter(getTypeUtils().doTypeRetrieval().getTypeElement(typeMirror.toString()).getEnclosedElements()).applyFilter(Filters.getElementKindFilter()).filterByOneOf(ElementKind.ENUM_CONSTANT).getResult().get(0).getSimpleName().toString();
@@ -390,7 +414,14 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
     }
 
-
+    /**
+     * Creates the unit test files for all processors.
+     *
+     * @param annotationType
+     * @param targetPackage
+     * @param annotationProcessorClassName
+     * @param testcases
+     */
     private void createAnnotationProcessorTestcase(TypeElement annotationType, String targetPackage, String annotationProcessorClassName, Testcase[] testcases) {
 
 
@@ -416,6 +447,12 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
     }
 
+    /**
+     * Creates the pom.xml file.
+     *
+     * @param element
+     * @param generateProjectStructureAnnotation
+     */
     private void createPom(Element element, GenerateProjectStructure generateProjectStructureAnnotation) {
 
         // create Model

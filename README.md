@@ -22,6 +22,24 @@ This includes
 
 # How does it work?
 
+It's quite simple. Create a package-info.java file.
+Annotate that package with the _GenerateProjectStructure_ annotation.
+
+For example for JPA:
+
+    @GenerateProjectStructure(
+            mvnGroupId = "io.toolisticon.byoct.jpa",
+            mvnArtifactId = "byoct-jpa",
+            sourcePackageRoot = "javax.persistence",
+            relocationBasePackage = "javax.persistence",
+            targetPackageName = "io.toolisticon.byoct.jpa")
+
+Make sure that both byoct jar and the annotation api jar are on classpath during compilation.
+You can just use the example project to do that.
+
+The Project will be located in the target/classes folder.
+
+Copy the generated pom.xml and src folder.
 
 # Contributing
 

@@ -134,7 +134,7 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
     }
 
     @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    public boolean processAnnotations(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
         for (Element element : roundEnv.getElementsAnnotatedWith(GenerateProjectStructure.class)) {
 
@@ -333,7 +333,7 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        List<ExecutableElement> executableElements = ElementUtils.CastElement.castElementList(FluentElementFilter.createFluentFilter(typeElement.getEnclosedElements()).applyFilter(Filters.getElementKindFilter()).filterByOneOf(ElementKind.METHOD).getResult(), ExecutableElement.class);
+        List<ExecutableElement> executableElements = ElementUtils.CastElement.castElementList(FluentElementFilter.createFluentFilter(typeElement.getEnclosedElements()).applyFilter(Filters.ELEMENT_KIND_FILTER).filterByOneOf(ElementKind.METHOD).getResult(), ExecutableElement.class);
 
         boolean first = true;
         for (ExecutableElement executableElement : executableElements) {
@@ -394,7 +394,7 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
                     } else if (((TypeElement) getTypeUtils().getTypes().asElement(typeMirror)).getKind().equals(ElementKind.ENUM)) {
 
 
-                        String enumConstant = FluentElementFilter.createFluentFilter(getTypeUtils().doTypeRetrieval().getTypeElement(typeMirror.toString()).getEnclosedElements()).applyFilter(Filters.getElementKindFilter()).filterByOneOf(ElementKind.ENUM_CONSTANT).getResult().get(0).getSimpleName().toString();
+                        String enumConstant = FluentElementFilter.createFluentFilter(getTypeUtils().doTypeRetrieval().getTypeElement(typeMirror.toString()).getEnclosedElements()).applyFilter(Filters.ELEMENT_KIND_FILTER).filterByOneOf(ElementKind.ENUM_CONSTANT).getResult().get(0).getSimpleName().toString();
                         stringBuilder.append(typeMirror.toString()).append(".").append(enumConstant);
 
                     }

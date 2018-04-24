@@ -1,5 +1,6 @@
 package io.toolisticon.byoct.api;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -14,7 +15,7 @@ public @interface GenerateProjectStructure {
 
     /**
      * The path to create the project.
-     * If not set it should default into the StandardLocation.SSOURCE_OUTPUT
+     * If not set it should default into the StandardLocation.SOURCE_OUTPUT
      *
      * @return
      */
@@ -41,6 +42,15 @@ public @interface GenerateProjectStructure {
      * @return
      */
     String mvnArtifactId();
+
+
+    /**
+     * (Optional) Defines the annotations to be processed. If not set the package defined in sourcePackageRoot or the package where this annotation is used should be used.
+     *
+     * @return
+     */
+    Class<? extends Annotation>[] annotations() default {};
+
 
     /**
      * (Optional) Defines the root package to search annotations in. If not set the package where this annotation is used should be used.

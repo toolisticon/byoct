@@ -1,10 +1,12 @@
 package io.toolisticon.byoct.processor;
 
 import io.toolisticon.annotationprocessortoolkit.AbstractAnnotationProcessor;
-import io.toolisticon.annotationprocessortoolkit.filter.FluentElementFilter;
+import io.toolisticon.annotationprocessortoolkit.ToolingProvider;
 import io.toolisticon.annotationprocessortoolkit.generators.SimpleResourceWriter;
 import io.toolisticon.annotationprocessortoolkit.tools.ElementUtils;
-import io.toolisticon.annotationprocessortoolkit.tools.characteristicsfilter.Filters;
+import io.toolisticon.annotationprocessortoolkit.tools.TypeUtils;
+import io.toolisticon.annotationprocessortoolkit.tools.corematcher.CoreMatchers;
+import io.toolisticon.annotationprocessortoolkit.tools.fluentfilter.FluentElementFilter;
 import io.toolisticon.byoct.api.GenerateProjectStructure;
 import io.toolisticon.spiap.api.Service;
 
@@ -333,7 +335,7 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        List<ExecutableElement> executableElements = ElementUtils.CastElement.castElementList(FluentElementFilter.createFluentFilter(typeElement.getEnclosedElements()).applyFilter(Filters.ELEMENT_KIND_FILTER).filterByOneOf(ElementKind.METHOD).getResult(), ExecutableElement.class);
+        List<ExecutableElement> executableElements = ElementUtils.CastElement.castElementList(FluentElementFilter.createFluentElementFilter(typeElement.getEnclosedElements()).applyFilter(CoreMatchers.BY_ELEMENT_KIND).filterByOneOf(ElementKind.METHOD).getResult(), ExecutableElement.class);
 
         boolean first = true;
         for (ExecutableElement executableElement : executableElements) {
@@ -352,35 +354,35 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
                 TypeMirror typeMirror = executableElement.getReturnType();
 
 
-                boolean isArray = getTypeUtils().doCheckTypeKind().isArray(typeMirror);
+                boolean isArray = TypeUtils.CheckTypeKind.isArray(typeMirror);
 
                 if (isArray) {
                     stringBuilder.append("{");
-                    typeMirror = getTypeUtils().doArrays().getArraysComponentType(typeMirror);
+                    typeMirror = TypeUtils.Arrays.getArraysComponentType(typeMirror);
                 }
 
-                if (getTypeUtils().doCheckTypeKind().isOfTypeKind(typeMirror, TypeKind.BOOLEAN)) {
+                if (TypeUtils.CheckTypeKind.isOfTypeKind(typeMirror, TypeKind.BOOLEAN)) {
                     stringBuilder.append(true);
-                } else if (getTypeUtils().doCheckTypeKind().isOfTypeKind(typeMirror, TypeKind.CHAR)) {
+                } else if (TypeUtils.CheckTypeKind.isOfTypeKind(typeMirror, TypeKind.CHAR)) {
                     stringBuilder.append("'X'");
-                } else if (getTypeUtils().doCheckTypeKind().isOfTypeKind(typeMirror, TypeKind.LONG)) {
+                } else if (TypeUtils.CheckTypeKind.isOfTypeKind(typeMirror, TypeKind.LONG)) {
                     stringBuilder.append("5L");
-                } else if (getTypeUtils().doCheckTypeKind().isOfTypeKind(typeMirror, TypeKind.INT)) {
+                } else if (TypeUtils.CheckTypeKind.isOfTypeKind(typeMirror, TypeKind.INT)) {
                     stringBuilder.append("5");
-                } else if (getTypeUtils().doCheckTypeKind().isOfTypeKind(typeMirror, TypeKind.FLOAT)) {
+                } else if (TypeUtils.CheckTypeKind.isOfTypeKind(typeMirror, TypeKind.FLOAT)) {
                     stringBuilder.append("5.0f");
-                } else if (getTypeUtils().doCheckTypeKind().isOfTypeKind(typeMirror, TypeKind.DOUBLE)) {
+                } else if (TypeUtils.CheckTypeKind.isOfTypeKind(typeMirror, TypeKind.DOUBLE)) {
                     stringBuilder.append("5.0");
-                } else if (getTypeUtils().doCheckTypeKind().isOfTypeKind(typeMirror, TypeKind.DECLARED)) {
+                } else if (TypeUtils.CheckTypeKind.isOfTypeKind(typeMirror, TypeKind.DECLARED)) {
 
 
-                    if (getTypeUtils().doTypeComparison().isAssignableTo(typeMirror, getTypeUtils().doTypeRetrieval().getTypeMirror(String.class))) {
+                    if (TypeUtils.TypeComparison.isAssignableTo(typeMirror, TypeUtils.TypeRetrieval.getTypeMirror(String.class))) {
                         stringBuilder.append("\"STRING\"");
-                    } else if (getTypeUtils().doTypeComparison().isAssignableTo(typeMirror, getTypeUtils().doTypeRetrieval().getTypeMirror(Annotation.class))) {
-                        stringBuilder.append("@" + typeMirror.toString()).append("(" + createMandatoryAnnotationAttributeString(getTypeUtils().doTypeRetrieval().getTypeElement(typeMirror.toString())) + ")");
-                    } else if (getTypeUtils().doTypeComparison().isAssignableTo(typeMirror, getTypeUtils().doTypeRetrieval().getTypeMirror(Class.class))) {
+                    } else if (TypeUtils.TypeComparison.isAssignableTo(typeMirror, TypeUtils.TypeRetrieval.getTypeMirror(Annotation.class))) {
+                        stringBuilder.append("@" + typeMirror.toString()).append("(" + createMandatoryAnnotationAttributeString(TypeUtils.TypeRetrieval.getTypeElement(typeMirror.toString())) + ")");
+                    } else if (TypeUtils.TypeComparison.isAssignableTo(typeMirror, TypeUtils.TypeRetrieval.getTypeMirror(Class.class))) {
 
-                        List<? extends TypeParameterElement> typeParameterElements = getTypeUtils().doTypeRetrieval().getTypeElement(typeMirror.toString()).getTypeParameters();
+                        List<? extends TypeParameterElement> typeParameterElements = TypeUtils.TypeRetrieval.getTypeElement(typeMirror.toString()).getTypeParameters();
                         if (typeParameterElements.size() == 0) {
                             stringBuilder.append("String.class");
                         } else {
@@ -391,10 +393,10 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
                             }
                         }
 
-                    } else if (((TypeElement) getTypeUtils().getTypes().asElement(typeMirror)).getKind().equals(ElementKind.ENUM)) {
+                    } else if (((TypeElement) ToolingProvider.getTooling().getTypes().asElement(typeMirror)).getKind().equals(ElementKind.ENUM)) {
 
 
-                        String enumConstant = FluentElementFilter.createFluentFilter(getTypeUtils().doTypeRetrieval().getTypeElement(typeMirror.toString()).getEnclosedElements()).applyFilter(Filters.ELEMENT_KIND_FILTER).filterByOneOf(ElementKind.ENUM_CONSTANT).getResult().get(0).getSimpleName().toString();
+                        String enumConstant = FluentElementFilter.createFluentElementFilter(TypeUtils.TypeRetrieval.getTypeElement(typeMirror.toString()).getEnclosedElements()).applyFilter(CoreMatchers.BY_ELEMENT_KIND).filterByOneOf(ElementKind.ENUM_CONSTANT).getResult().get(0).getSimpleName().toString();
                         stringBuilder.append(typeMirror.toString()).append(".").append(enumConstant);
 
                     }

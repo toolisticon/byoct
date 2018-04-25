@@ -3,6 +3,7 @@ package io.toolisticon.byoct.processor;
 import io.toolisticon.annotationprocessortoolkit.AbstractAnnotationProcessor;
 import io.toolisticon.annotationprocessortoolkit.ToolingProvider;
 import io.toolisticon.annotationprocessortoolkit.generators.SimpleResourceWriter;
+import io.toolisticon.annotationprocessortoolkit.tools.AnnotationUtils;
 import io.toolisticon.annotationprocessortoolkit.tools.ElementUtils;
 import io.toolisticon.annotationprocessortoolkit.tools.TypeUtils;
 import io.toolisticon.annotationprocessortoolkit.tools.corematcher.CoreMatchers;
@@ -178,7 +179,26 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
             PackageElement sourcePackageElement = getElements().getPackageElement(sourcePackageRoot);
 
-            List<? extends Element> enclosedAnnotations = ElementUtils.AccessEnclosedElements.getEnclosedElementsOfKind(sourcePackageElement, ElementKind.ANNOTATION_TYPE);
+
+            // check if annotations attribute is used
+            TypeMirror[] annotationTypeMirrors = AnnotationUtils.getClassArrayAttributeFromAnnotationAsTypeMirror(element, GenerateProjectStructure.class, "annotations");
+
+
+            List<Element> enclosedAnnotations = null;
+            if (annotationTypeMirrors.length > 0) {
+
+                enclosedAnnotations = new ArrayList<Element>();
+
+
+                for (TypeMirror curAnnotation : annotationTypeMirrors) {
+                    enclosedAnnotations.add(ToolingProvider.getTooling().getTypes().asElement(curAnnotation));
+                }
+
+
+            } else {
+                enclosedAnnotations = (List<Element>) ElementUtils.AccessEnclosedElements.getEnclosedElementsOfKind(sourcePackageElement, ElementKind.ANNOTATION_TYPE);
+            }
+
 
             for (Element annotationElement : enclosedAnnotations) {
 

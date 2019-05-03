@@ -62,12 +62,6 @@ The likelihood of a pull request being used rises with the following properties:
 
 - (2018) Tobias Stamann (Holisticon AG)
 
-## Sponsoring
-
-This project is sponsored and supported by [holisticon AG](http://www.holisticon.de/)
-
-![Holisticon AG](/holisticon-logo.png)
-
 # License
 
 This project is released under the revised [MIT License](LICENSE).

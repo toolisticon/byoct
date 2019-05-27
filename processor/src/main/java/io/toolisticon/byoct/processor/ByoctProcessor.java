@@ -2,12 +2,14 @@ package io.toolisticon.byoct.processor;
 
 import io.toolisticon.annotationprocessortoolkit.AbstractAnnotationProcessor;
 import io.toolisticon.annotationprocessortoolkit.ToolingProvider;
-import io.toolisticon.annotationprocessortoolkit.generators.SimpleResourceWriter;
 import io.toolisticon.annotationprocessortoolkit.tools.AnnotationUtils;
 import io.toolisticon.annotationprocessortoolkit.tools.ElementUtils;
+import io.toolisticon.annotationprocessortoolkit.tools.FilerUtils;
+import io.toolisticon.annotationprocessortoolkit.tools.MessagerUtils;
 import io.toolisticon.annotationprocessortoolkit.tools.TypeUtils;
 import io.toolisticon.annotationprocessortoolkit.tools.corematcher.CoreMatchers;
 import io.toolisticon.annotationprocessortoolkit.tools.fluentfilter.FluentElementFilter;
+import io.toolisticon.annotationprocessortoolkit.tools.generators.SimpleResourceWriter;
 import io.toolisticon.byoct.api.GenerateProjectStructure;
 import io.toolisticon.spiap.api.Service;
 
@@ -21,12 +23,14 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.tools.JavaFileManager;
 import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -143,6 +147,7 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
             PackageElement packageElement = (PackageElement) element;
 
+
             GenerateProjectStructure annotation = element.getAnnotation(GenerateProjectStructure.class);
 
             // now do some validations
@@ -154,10 +159,10 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
             String targetPackageName = annotation.targetPackageName().trim();
             if (targetPackageName.isEmpty()) {
-                getMessager().error(element, "Target package name must not be empty");
+                MessagerUtils.error(element, "Target package name must not be empty");
             }
             if (!PACKAGE_PATTERN.matcher(targetPackageName).matches()) {
-                getMessager().error(element, "Target package name must be a valid package name");
+                MessagerUtils.error(element, "Target package name must be a valid package name");
             }
 
             String sourcePackageRoot = annotation.sourcePackageRoot().trim().isEmpty() ? packageElement.getQualifiedName().toString() : annotation.sourcePackageRoot().trim();
@@ -165,13 +170,13 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
             String relocationBasePackage = annotation.relocationBasePackage().trim();
             if (relocationBasePackage.isEmpty()) {
-                getMessager().error(element, "Target package name must not be empty");
+                MessagerUtils.error(element, "Target package name must not be empty");
             }
             if (!PACKAGE_PATTERN.matcher(relocationBasePackage).matches()) {
-                getMessager().error(element, "Relocation base package name must be a valid package name");
+                MessagerUtils.error(element, "Relocation base package name must be a valid package name");
             }
             if (!relocationBasePackage.equals(sourcePackageRoot.substring(0, relocationBasePackage.length()))) {
-                getMessager().error(element, "Relocation base package name '${0}' must be a prefix of  source package root '${1}'", relocationBasePackage, sourcePackageRoot);
+                MessagerUtils.error(element, "Relocation base package name '${0}' must be a prefix of  source package root '${1}'", relocationBasePackage, sourcePackageRoot);
             }
 
             createPom(element, annotation);
@@ -267,11 +272,11 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
 
         try {
-            SimpleResourceWriter resourceWriter = getFileObjectUtils().createResource(fileName, filePath, StandardLocation.CLASS_OUTPUT);
+            SimpleResourceWriter resourceWriter = FilerUtils.createResource(StandardLocation.CLASS_OUTPUT,filePath,fileName);
             resourceWriter.writeTemplate("/AnnotationProcessorTemplate.java.tpl", model);
             resourceWriter.close();
         } catch (IOException e) {
-            getMessager().error(null, ByoctProcessorMessages.ERROR_COULD_NOT_GENERATE_ANNOTATION_PROCESSOR.getMessage(), filePath);
+            MessagerUtils.error(null, ByoctProcessorMessages.ERROR_COULD_NOT_GENERATE_ANNOTATION_PROCESSOR.getMessage(), filePath);
         }
 
     }
@@ -297,11 +302,11 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
 
         try {
-            SimpleResourceWriter resourceWriter = getFileObjectUtils().createResource(fileName, filePath, StandardLocation.CLASS_OUTPUT);
+            SimpleResourceWriter resourceWriter = FilerUtils.createResource(StandardLocation.CLASS_OUTPUT, filePath, fileName);
             resourceWriter.writeTemplate("/AnnotationProcessorMessageTemplate.java.tpl", model);
             resourceWriter.close();
         } catch (IOException e) {
-            getMessager().error(null, ByoctProcessorMessages.ERROR_COULD_NOT_GENERATE_ANNOTATION_PROCESSOR_MESSAGES.getMessage(), filePath);
+            MessagerUtils.error(null, ByoctProcessorMessages.ERROR_COULD_NOT_GENERATE_ANNOTATION_PROCESSOR_MESSAGES.getMessage(), filePath);
         }
 
     }
@@ -334,12 +339,12 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
 
             try {
-                SimpleResourceWriter resourceWriter = getFileObjectUtils().createResource(fileName, filePath, StandardLocation.CLASS_OUTPUT);
+                SimpleResourceWriter resourceWriter = FilerUtils.createResource(StandardLocation.CLASS_OUTPUT, filePath, fileName);
                 resourceWriter.writeTemplate(testcase.templateName, model);
                 resourceWriter.close();
             } catch (IOException e) {
                 e.printStackTrace();
-                getMessager().error(null, ByoctProcessorMessages.ERROR_COULD_NOT_GENERATE_UNIT_TEST.getMessage(), filePath);
+                MessagerUtils.error(null, ByoctProcessorMessages.ERROR_COULD_NOT_GENERATE_UNIT_TEST.getMessage(), filePath);
             }
 
         }
@@ -460,11 +465,11 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
 
 
         try {
-            SimpleResourceWriter resourceWriter = getFileObjectUtils().createResource(fileName, filePath, StandardLocation.CLASS_OUTPUT);
+            SimpleResourceWriter resourceWriter = FilerUtils.createResource(StandardLocation.CLASS_OUTPUT, filePath, fileName);
             resourceWriter.writeTemplate("/AnnotationProcessorTestTemplate.java.tpl", model);
             resourceWriter.close();
         } catch (IOException e) {
-            getMessager().error(null, ByoctProcessorMessages.ERROR_COULD_NOT_GENERATE_UNIT_TEST.getMessage(), filePath);
+            MessagerUtils.error(null, ByoctProcessorMessages.ERROR_COULD_NOT_GENERATE_UNIT_TEST.getMessage(), filePath);
         }
 
     }
@@ -490,11 +495,11 @@ public class ByoctProcessor extends AbstractAnnotationProcessor {
         String fileName = "pom.xml";
 
         try {
-            SimpleResourceWriter resourceWriter = getFileObjectUtils().createResource(fileName, "", StandardLocation.CLASS_OUTPUT);
+            SimpleResourceWriter resourceWriter = FilerUtils.createResource(StandardLocation.CLASS_OUTPUT, "", fileName);
             resourceWriter.writeTemplate("/pom.xml.tpl", model);
             resourceWriter.close();
         } catch (IOException e) {
-            getMessager().error(element, ByoctProcessorMessages.ERROR_COULD_NOT_GENERATE_POM_XML.getMessage());
+            MessagerUtils.error(element, ByoctProcessorMessages.ERROR_COULD_NOT_GENERATE_POM_XML.getMessage());
         }
 
 

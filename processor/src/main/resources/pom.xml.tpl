@@ -11,10 +11,11 @@
     <url>https://github.com/...</url>
 
     <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>9</version>
+        <groupId>io.toolisticon.maven</groupId>
+        <artifactId>maven-oss-parent</artifactId>
+        <version>0.7.0</version>
     </parent>
+
 
     <!-- TODO: FILL ORGANIZATION AND DEVELOPERS -->
     <organization>
@@ -83,16 +84,16 @@
         <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
         <encoding>UTF-8</encoding>
 
-        <annotationProcessorToolkit.version>0.9.0</annotationProcessorToolkit.version>
+        <annotationProcessorToolkit.version>0.12.0</annotationProcessorToolkit.version>
 
-        <spiap.version>0.5.0</spiap.version>
+        <spiap.version>0.7.0</spiap.version>
 
         <!-- versions of test dependencies -->
         <junit.version>4.12</junit.version>
         <hamcrest.version>1.3</hamcrest.version>
         <mockito.version>1.10.19</mockito.version>
         <lombok.version>1.16.6</lombok.version>
-        <google-compile-testing.version>0.9</google-compile-testing.version>
+        <toolisticon-compile-testing.version>0.5.0</toolisticon-compile-testing.version>
 
     </properties>
 
@@ -461,7 +462,7 @@
                 <groupId>io.toolisticon.spiap</groupId>
                 <artifactId>spiap-api</artifactId>
                 <version>${spiap.version}</version>
-                <scope>compile</scope>
+                <scope>provided</scope>
             </dependency>
 
             <dependency>
@@ -510,9 +511,9 @@
             </dependency>
 
             <dependency>
-                <groupId>com.google.testing.compile</groupId>
-                <artifactId>compile-testing</artifactId>
-                <version>${google-compile-testing.version}</version>
+                <groupId>io.toolisticon.compiletesting</groupId>
+                <artifactId>compiletesting</artifactId>
+                <version>${toolisticon-compile-testing.version}</version>
                 <scope>test</scope>
             </dependency>
 
@@ -543,8 +544,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.testing.compile</groupId>
-            <artifactId>compile-testing</artifactId>
+            <groupId>io.toolisticon.compiletesting</groupId>
+            <artifactId>compiletesting</artifactId>
         </dependency>
 
         <dependency>
@@ -552,6 +553,10 @@
             <artifactId>testhelper</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
 
     </dependencies>
 

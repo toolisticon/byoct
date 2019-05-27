@@ -37,8 +37,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.testing.compile</groupId>
-            <artifactId>compile-testing</artifactId>
+            <groupId>io.toolisticon.compiletesting</groupId>
+            <artifactId>compiletesting</artifactId>
             <scope>test</scope>
         </dependency>
 
